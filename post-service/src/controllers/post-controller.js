@@ -4,6 +4,8 @@ const { validateCreatePost } = require("../utils/validation");
 
 async function invalidatePostCache(req, input) {
   try {
+    const cachedKey = `post:${input}`;
+    await req.redisClient.del(cachedKey);
     const keys = await req.redisClient.keys("posts:*");
     if (keys.length > 0) {
       await req.redisClient.del(keys);
@@ -114,6 +116,15 @@ const getPost = async (req, res) => {
 const deletePost = async (req, res) => {
   logger.info("Delete Post endpoint hit!");
   try {
+    const post = await Post.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user.userId,
+    });
+    await invalidatePostCache(req, req.params.id);
+    res.json({
+      success: true,
+      message: "Post deleted successfully!",
+    });
   } catch (error) {
     logger.info("Error deleting Post", error);
     res.status(500).json({
