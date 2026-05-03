@@ -2,6 +2,21 @@ const logger = require("../utils/logger");
 const Post = require("../models/Post");
 const { validateCreatePost } = require("../utils/validation");
 
+async function invalidatePostCache(req, input) {
+  try {
+    const keys = await req.redisClient.keys("posts:*");
+    if (keys.length > 0) {
+      await req.redisClient.del(keys);
+    }
+  } catch (error) {
+    logger.info("Error In invalidate post cache", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+}
+
 const createPost = async (req, res) => {
   logger.info("Create Post endpoint hit!");
   try {
@@ -21,6 +36,7 @@ const createPost = async (req, res) => {
       mediaUrls: mediaUrls || [],
     });
     await newlyCreatedPost.save();
+    await invalidatePostCache(req, newlyCreatedPost._id.toString());
     res.status(201).json({
       success: true,
       message: "Post Created Successfully!",
@@ -36,8 +52,32 @@ const createPost = async (req, res) => {
 const getAllPost = async (req, res) => {
   logger.info("Get All Posts endpoint hit!");
   try {
+    // pagination implemented
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const startIndex = (page - 1) * limit;
+
+    const cacheKey = `posts:${page}:${limit}`;
+    const cachedPosts = await req.redisClient.get(cacheKey);
+    if (cachedPosts) {
+      return res.json(JSON.parse(cachedPosts));
+    }
+    const posts = await Post.find({})
+      .sort({ createdAt: -1 })
+      .skip(startIndex)
+      .limit(limit);
+    const totalNoOfPosts = await Post.countDocuments();
+    const result = {
+      posts,
+      currentPage: page,
+      totalPages: Math.ceil(totalNoOfPosts / limit),
+      totalPosts: totalNoOfPosts,
+    };
+    // save posts in redis cache
+    await req.redisClient.setex(cacheKey, 300, JSON.stringify(result));
+    res.json(result);
   } catch (error) {
-    logger.info("Error Getting ALl Posts", error);
+    logger.error("Error Getting ALl Posts", error);
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
@@ -67,4 +107,4 @@ const deletePost = async (req, res) => {
   }
 };
 
-module.exports = { createPost };
+module.exports = { createPost, getAllPost };

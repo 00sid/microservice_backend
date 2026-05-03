@@ -250,7 +250,7 @@ const sensitiveGetPostsEndpointsLimiter = rateLimit({
 
 // Apply specific rate limiters to endpoints
 // app.use("/api/posts/create-post", sensitiveCreatePostEndpointsLimiter);
-app.use("/api/posts/get-all-posts", sensitiveGetPostsEndpointsLimiter);
+// app.use("/api/posts/all-posts", sensitiveGetPostsEndpointsLimiter);
 
 // ----------------------
 // Routes
