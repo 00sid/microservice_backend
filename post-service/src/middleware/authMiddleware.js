@@ -9,7 +9,7 @@ const authenticateRequest = async (req, res, next) => {
       message: "Authentication required! Please login to continue!",
     });
   }
-  req.user = userId;
+  req.user = { userId };
   next();
 };
 

@@ -31,7 +31,7 @@ const createPost = async (req, res) => {
       });
     }
     const newlyCreatedPost = new Post({
-      user: req.user,
+      user: req.user.userId,
       content,
       mediaUrls: mediaUrls || [],
     });
@@ -87,6 +87,22 @@ const getAllPost = async (req, res) => {
 const getPost = async (req, res) => {
   logger.info("Get Post endpoint hit!");
   try {
+    const postId = req.params.id;
+    const cacheKey = `post:${postId}`;
+    const cachedPost = await req.redisClient.get(cacheKey);
+    if (cachedPost) {
+      return res.json(JSON.parse(cachedPost));
+    }
+    const postById = await Post.findById(postId);
+    if (!postById) {
+      res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+    await req.redisClient.setex(cacheKey, 3600, JSON.stringify(postById));
+
+    res.json(postById);
   } catch (error) {
     logger.info("Error Getting Post", error);
     res.status(500).json({
@@ -107,4 +123,4 @@ const deletePost = async (req, res) => {
   }
 };
 
-module.exports = { createPost, getAllPost };
+module.exports = { createPost, getAllPost, getPost, deletePost };
