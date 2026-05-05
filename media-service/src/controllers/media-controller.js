@@ -44,6 +44,7 @@ const uploadMedia = async (req, res) => {
   }
 };
 
+// get media by id
 const getMedia = async (req, res) => {
   logger.info("Fetching media data");
   try {
@@ -74,5 +75,23 @@ const getMedia = async (req, res) => {
     });
   }
 };
+// get all media
+const getAllMedia = async (req, res) => {
+  logger.info("Fetching All media data");
+  try {
+    const allMedias = await Media.find({});
 
-module.exports = { uploadMedia, getMedia };
+    res.status(200).json({
+      success: true,
+      medias: allMedias,
+    });
+  } catch (error) {
+    logger.info("Error fetching Media!", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+module.exports = { uploadMedia, getMedia, getAllMedia };

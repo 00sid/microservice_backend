@@ -2,7 +2,11 @@ const express = require("express");
 const multer = require("multer");
 const authenticateRequest = require("../middleware/authMiddleware");
 const logger = require("../utils/logger");
-const { uploadMedia, getMedia } = require("../controllers/media-controller");
+const {
+  uploadMedia,
+  getMedia,
+  getAllMedia,
+} = require("../controllers/media-controller");
 
 const router = express.Router();
 
@@ -48,6 +52,7 @@ router.post(
   uploadMedia,
 );
 
+router.get("/get", authenticateRequest, getAllMedia);
 router.get("/:id", authenticateRequest, getMedia);
 
 module.exports = router;

@@ -8,6 +8,8 @@ const helmet = require("helmet"); // Security headers
 const cors = require("cors"); // Cross-origin requests
 const mediaRoutes = require("./routes/media-routes"); // Media-related routes
 const errorHandler = require("./middleware/errorHandler"); // Global error handler
+const { consumeEvent, connectTORabbitMq } = require("./utils/rabbitmq");
+const { handlePostDelete } = require("./eventHandlers/media-event-handler");
 
 // Initialize Express app
 const app = express();
@@ -58,6 +60,8 @@ app.use(errorHandler);
 async function startServer() {
   try {
     await connectTORabbitMq();
+    // consume all events
+    await consumeEvent("post-delete", handlePostDelete);
     app.listen(PORT, () => {
       logger.info(`Media service running on port ${PORT}`);
     });

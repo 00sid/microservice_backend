@@ -33,7 +33,7 @@ async function publishEvent(routingKey, message) {
     logger.error("Error while publishing event to rabbit mq", error);
   }
 }
-async function consumeEvent(routingKey, message) {
+async function consumeEvent(routingKey, callback) {
   try {
     if (!channel) {
       await connectTORabbitMq();
@@ -44,7 +44,7 @@ async function consumeEvent(routingKey, message) {
     channel.consume(q.queue, (msg) => {
       if (msg !== null) {
         const content = JSON.parse(msg.content.toString());
-        useCallback(content);
+        callback(content);
         channel.ack(msg);
       }
     });
