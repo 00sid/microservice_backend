@@ -2,7 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const authenticateRequest = require("../middleware/authMiddleware");
 const logger = require("../utils/logger");
-const { uploadMedia } = require("../controllers/media-controller");
+const { uploadMedia, getMedia } = require("../controllers/media-controller");
 
 const router = express.Router();
 
@@ -37,7 +37,7 @@ router.post(
         });
       }
       if (!req.file) {
-        res.status(400).json({
+        res.status(404).json({
           success: false,
           message: "No file found!",
         });
@@ -47,5 +47,7 @@ router.post(
   },
   uploadMedia,
 );
+
+router.get("/:id", authenticateRequest, getMedia);
 
 module.exports = router;

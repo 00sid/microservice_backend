@@ -44,4 +44,35 @@ const uploadMedia = async (req, res) => {
   }
 };
 
-module.exports = { uploadMedia };
+const getMedia = async (req, res) => {
+  logger.info("Fetching media data");
+  try {
+    const mediaId = req.params.id;
+    if (!mediaId) {
+      return res.status(400).json({
+        success: false,
+        message: "No media available!",
+      });
+    }
+    const media = await Media.findById(mediaId);
+    if (!media) {
+      return res.status(404).json({
+        success: false,
+        message: "Media not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      mediaUrl: media.url,
+      createdBy: media.userId,
+    });
+  } catch (error) {
+    logger.info("Error fetching Media!", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+module.exports = { uploadMedia, getMedia };
