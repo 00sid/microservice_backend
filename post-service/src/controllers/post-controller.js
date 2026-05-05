@@ -39,6 +39,14 @@ const createPost = async (req, res) => {
       mediaIds: mediaIds || [],
     });
     await newlyCreatedPost.save();
+    // Publish event for search service
+
+    await publishEvent("post-created", {
+      postId: newlyCreatedPost._id.toString(),
+      userId: newlyCreatedPost.user.toString(),
+      content: newlyCreatedPost.content,
+      createdAt: newlyCreatedPost.createdAt,
+    });
     await invalidatePostCache(req, newlyCreatedPost._id.toString());
     res.status(201).json({
       success: true,
