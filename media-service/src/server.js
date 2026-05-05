@@ -55,9 +55,19 @@ app.use(errorHandler);
 // ----------------------
 // Start Server
 // ----------------------
-app.listen(PORT, () => {
-  logger.info(`Media service running on port ${PORT}`);
-});
+async function startServer() {
+  try {
+    await connectTORabbitMq();
+    app.listen(PORT, () => {
+      logger.info(`Media service running on port ${PORT}`);
+    });
+  } catch (error) {
+    logger.error("Error while connecting to server!");
+    process.exit(1);
+  }
+}
+
+startServer();
 
 // ----------------------
 // Handle Unhandled Promise Rejections

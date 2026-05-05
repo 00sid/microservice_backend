@@ -29,6 +29,29 @@ async function publishEvent(routingKey, message) {
       Buffer.from(JSON.stringify(message)),
       logger.info(`Event publish from post service: ${routingKey}`),
     );
-  } catch (error) {}
+  } catch (error) {
+    logger.error("Error while publishing event to rabbit mq", error);
+  }
 }
-module.exports = { connectTORabbitMq, publishEvent };
+async function consumeEvent(routingKey, message) {
+  try {
+    if (!channel) {
+      await connectTORabbitMq();
+    }
+
+    const q = await channel.assertQueue("", { exclusive: true });
+    await channel.bindQueue(q.queue, EXCHANGE_NAME, routingKey);
+    channel.consume(q.queue, (msg) => {
+      if (msg !== null) {
+        const content = JSON.parse(msg.content.toString());
+        useCallback(content);
+        channel.ack(msg);
+      }
+    });
+    logger.info(`Subscribed to event:${routingKey}`);
+  } catch (error) {
+    logger.error("Error while subscribing to rabbit mq", error);
+  }
+}
+
+module.exports = { connectTORabbitMq, publishEvent, consumeEvent };
