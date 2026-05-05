@@ -147,6 +147,7 @@ const errorHandler = require("./middleware/errorHandler"); // Global error handl
 const { RateLimiterRedis } = require("rate-limiter-flexible");
 const { rateLimit } = require("express-rate-limit");
 const { RedisStore } = require("rate-limit-redis");
+const { connectTORabbitMq } = require("./utils/rabbitmq");
 
 // Initialize Express app
 const app = express();
@@ -274,9 +275,19 @@ app.use(errorHandler);
 // ----------------------
 // Start Server
 // ----------------------
-app.listen(PORT, () => {
-  logger.info(`Post service running on port ${PORT}`);
-});
+async function startServer() {
+  try {
+    await connectTORabbitMq();
+    app.listen(PORT, () => {
+      logger.info(`Post service running on port ${PORT}`);
+    });
+  } catch (error) {
+    logger.error("Error while connecting to server!");
+    process.exit(1);
+  }
+}
+
+startServer();
 
 // ----------------------
 // Handle Unhandled Promise Rejections
