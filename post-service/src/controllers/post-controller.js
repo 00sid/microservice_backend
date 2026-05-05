@@ -22,7 +22,7 @@ async function invalidatePostCache(req, input) {
 const createPost = async (req, res) => {
   logger.info("Create Post endpoint hit!");
   try {
-    const { content, mediaUrls } = req.body;
+    const { content, mediaIds } = req.body;
     // Validate incoming request body
     const { error } = validateCreatePost(req.body);
     if (error) {
@@ -35,7 +35,7 @@ const createPost = async (req, res) => {
     const newlyCreatedPost = new Post({
       user: req.user.userId,
       content,
-      mediaUrls: mediaUrls || [],
+      mediaIds: mediaIds || [],
     });
     await newlyCreatedPost.save();
     await invalidatePostCache(req, newlyCreatedPost._id.toString());
