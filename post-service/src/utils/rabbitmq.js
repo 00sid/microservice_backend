@@ -18,4 +18,17 @@ async function connectTORabbitMq() {
   }
 }
 
-module.exports = { connectTORabbitMq };
+async function publishEvent(routingKey, message) {
+  try {
+    if (!channel) {
+      await connectTORabbitMq();
+    }
+    channel.publish(
+      EXCHANGE_NAME,
+      routingKey,
+      Buffer.from(JSON.stringify(message)),
+      logger.info(`Event publish from post service: ${routingKey}`),
+    );
+  } catch (error) {}
+}
+module.exports = { connectTORabbitMq, publishEvent };
