@@ -56,7 +56,7 @@ app.use(errorHandler);
 // Start Server
 // ----------------------
 app.listen(PORT, () => {
-  logger.info(`Post service running on port ${PORT}`);
+  logger.info(`Media service running on port ${PORT}`);
 });
 
 // ----------------------

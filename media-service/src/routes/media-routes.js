@@ -19,7 +19,7 @@ router.post(
   authenticateRequest,
   (req, res, next) => {
     upload(req, res, function (err) {
-      if (err instanceof multer.multer) {
+      if (err instanceof multer.MulterError) {
         logger.error("Multer error while uploading", err);
         res.status(400).json({
           success: false,
