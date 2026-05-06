@@ -10,6 +10,7 @@ const Redis = require("ioredis"); // Redis client
 const errorHandler = require("./middleware/errorHandler"); // Global error handler
 const searchRoutes = require("./routes/search-routes");
 const { handlePostCreate } = require("./handlers/search-event-handler");
+const { connectTORabbitMq, consumeEvent } = require("./utils/rabbitmq");
 
 // Initialize Express app
 const app = express();
@@ -59,7 +60,7 @@ async function startServer() {
       logger.info(`Search service running on port ${PORT}`);
     });
   } catch (error) {
-    logger.error("Error while connecting to server!");
+    logger.error("Error while connecting to server!", error);
     process.exit(1);
   }
 }
