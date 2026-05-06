@@ -5,12 +5,14 @@ const searchPostController = async (req, res) => {
   logger.info("Search endpoint hits!");
   try {
     const { query } = req.query;
-    const results = await Search.find({
-      $text: { $search: query },
-      $score: { $meta: "textScore" },
-    })
-      .sort({ $score: { $meta: "textScore" } })
+
+    const results = await Search.find(
+      { $text: { $search: query } }, // filter
+      { score: { $meta: "textScore" } }, // projection
+    )
+      .sort({ score: { $meta: "textScore" } }) // sort by score
       .limit(10);
+
     res.json(results);
   } catch (error) {
     logger.info("Error Searching Post!", error);
