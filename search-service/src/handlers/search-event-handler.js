@@ -21,7 +21,9 @@ async function handlePostCreate(event) {
 }
 async function handlePostDelete(event) {
   try {
-    const newSearchPost = new Search.findOneAndDelete({ postId: event.postId });
+    const newSearchPost = await Search.findOneAndDelete({
+      postId: event.postId,
+    });
     logger.info(`Search post deleted:${event.postId} }`);
   } catch (error) {
     logger.error(
