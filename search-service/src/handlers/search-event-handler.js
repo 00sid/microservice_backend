@@ -14,8 +14,20 @@ async function handlePostCreate(event) {
       `Search post created:${event.postId} searchId: ${newSearchPost._id.toString()}`,
     );
   } catch (error) {
-    logger.error("Error occurred during deletion of media from event handler ");
+    logger.error(
+      "Error occurred during creation of search from event handler ",
+    );
+  }
+}
+async function handlePostDelete(event) {
+  try {
+    const newSearchPost = new Search.findOneAndDelete({ postId: event.postId });
+    logger.info(`Search post deleted:${event.postId} }`);
+  } catch (error) {
+    logger.error(
+      "Error occurred during deletion of search from event handler ",
+    );
   }
 }
 
-module.exports = { handlePostCreate };
+module.exports = { handlePostCreate, handlePostDelete };

@@ -9,7 +9,10 @@ const cors = require("cors"); // Cross-origin requests
 const Redis = require("ioredis"); // Redis client
 const errorHandler = require("./middleware/errorHandler"); // Global error handler
 const searchRoutes = require("./routes/search-routes");
-const { handlePostCreate } = require("./handlers/search-event-handler");
+const {
+  handlePostCreate,
+  handlePostDelete,
+} = require("./handlers/search-event-handler");
 const { connectTORabbitMq, consumeEvent } = require("./utils/rabbitmq");
 
 // Initialize Express app
@@ -55,6 +58,7 @@ async function startServer() {
   try {
     await connectTORabbitMq();
     await consumeEvent("post-created", handlePostCreate);
+    await consumeEvent("post-delete", handlePostDelete);
 
     app.listen(PORT, () => {
       logger.info(`Search service running on port ${PORT}`);
